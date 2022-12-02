@@ -28,3 +28,38 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Problem 1
+
+```{r}
+
+```
+
+## Problem 2 
+
+Data import and manipulation 
+```{r}
+washp_df = 
+  read_csv("data/homicide-data copy.csv") %>% 
+  filter(victim_race %in% c("White", "Black")) %>% 
+  mutate(city_state = str_c(city, state, sep = ", "),
+         resolved = as.numeric(disposition == "Closed by arrest"),
+          victim_age = as.numeric(victim_age),
+          victim_race = fct_relevel(victim_race, "White"))  %>% 
+  filter(city != "Dallas" & city != "Phoenix" & 
+           city != "Kansas City" & city_state != "Tulsa, AL") 
+```
+
+Baltimore, MD glm
+
+```{r}
+balti_log = 
+  washp_df %>% 
+  filter(city == "Baltimore") %>%
+  glm(resolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial()) 
+
+balti_log %>% 
+  broom::tidy() %>% 
+  mutate(OR = exp(estimate)) %>%
+  select(term, estimate, OR, p.value) %>% 
+  knitr::kable(digits = 3)
+```
+
